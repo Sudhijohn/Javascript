@@ -1,16 +1,22 @@
 import * as model from './model';
 import Question from './views/question';
-import status from './views/status';
+import Status from './views/status';
 
 const controlAnswers = (id, ans) => {
   model.updateStatus(id, ans);
-  Question.generateMarkup(model.state.data);
-  status.generateMarkup(model.state.progress);
+  Question.display(model.state.data);
+  Status.displayView(model.state.progress);
+  Status.addClickHandler(controlReset);
 };
 
-(function () {
+const controlReset = () => {
+  model.reset();
+  Question.display(model.state.data);
+};
+
+(function init() {
   model.createInitalState();
 
-  Question.generateMarkup(model.state.data);
+  Question.display(model.state.data);
   Question.addChangeHandler(controlAnswers);
 })();

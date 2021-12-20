@@ -4,12 +4,15 @@ import tick from 'url:../../img/tick.png';
 class Question extends View {
   _parentContainer = document.querySelector('.question');
 
-  _generateQuestions() {
-    return this._data
-      .map(question => this._generateQuestionHTML(question))
-      .join();
+  display(state) {
+    this.displayView(state);
+    this.focusInput();
   }
-  _generateQuestionHTML(que) {
+
+  _generateMarkups() {
+    return this._data.map(question => this._generateMarkup(question)).join();
+  }
+  _generateMarkup(que) {
     return `
       <div data-id=${que.id} data-ans=${que.ans} 
        class="que-container ${que.correct ? 'complete' : ''}">
@@ -17,19 +20,28 @@ class Question extends View {
         <span class="number">+</span>
         <span class="number">${que.number2}</span>
         <span class="number">=</span>
-        <span class="search ${que.correct ? 'hide' : ''}">
+        <div class="answer ${que.correct ? 'hide' : ''}">
           <input
             type="number"
             min=0
-            class="search__field"
-            placeholder="Type here..."
+            class="answer__field"
+            show=${!que.correct}
+            placeholder="Answer here..."
           />
-        </span>
-        <span ${que.correct ? '' : 'hidden'}>
-            <span class="number">${que.ans}</span>
+        </div>
+        <div class="ans-container" ${que.correct ? '' : 'hidden'}>
+            <span class="ans-number">${que.ans}</span>
             <img src="${tick}" alt="Success" class="tick-logo" />
-        </span>
+        </div>
       </div>`;
+  }
+
+  focusInput() {
+    const inputs = Array.from(
+      this._parentContainer.getElementsByTagName('input')
+    ).filter(ele => ele.getAttribute('show') === 'true');
+    if (inputs.length === 0) return;
+    inputs[0].focus();
   }
 
   addChangeHandler(handler) {

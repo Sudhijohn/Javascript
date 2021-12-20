@@ -32,5 +32,11 @@ export const progressTracker = () => {
   const completed = state.data.filter(question => question.correct === true);
   state.progress.remaining = state.data.length - completed.length;
   state.progress.completed = completed.length;
-  console.log(state.data.length - completed.length, ' Remaining..');
+};
+
+export const reset = () => {
+  state.data.length = 0;
+  state.progress.completed = 0;
+  state.progress.remaining = 0;
+  createInitalState();
 };

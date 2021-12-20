@@ -467,16 +467,21 @@ var _status = require("./views/status");
 var _statusDefault = parcelHelpers.interopDefault(_status);
 const controlAnswers = (id, ans)=>{
     _model.updateStatus(id, ans);
-    _questionDefault.default.generateMarkup(_model.state.data);
-    _statusDefault.default.generateMarkup(_model.state.progress);
+    _questionDefault.default.display(_model.state.data);
+    _statusDefault.default.displayView(_model.state.progress);
+    _statusDefault.default.addClickHandler(controlReset);
 };
-(function() {
+const controlReset = ()=>{
+    _model.reset();
+    _questionDefault.default.display(_model.state.data);
+};
+(function init() {
     _model.createInitalState();
-    _questionDefault.default.generateMarkup(_model.state.data);
+    _questionDefault.default.display(_model.state.data);
     _questionDefault.default.addChangeHandler(controlAnswers);
 })();
 
-},{"./model":"1pVJj","./views/question":"11Iuu","@parcel/transformer-js/src/esmodule-helpers.js":"ciiiV","./views/status":"ijVUu"}],"1pVJj":[function(require,module,exports) {
+},{"./model":"1pVJj","./views/question":"11Iuu","./views/status":"ijVUu","@parcel/transformer-js/src/esmodule-helpers.js":"ciiiV"}],"1pVJj":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "state", ()=>state
@@ -486,6 +491,8 @@ parcelHelpers.export(exports, "createInitalState", ()=>createInitalState
 parcelHelpers.export(exports, "updateStatus", ()=>updateStatus
 );
 parcelHelpers.export(exports, "progressTracker", ()=>progressTracker
+);
+parcelHelpers.export(exports, "reset", ()=>reset
 );
 var _config = require("./config");
 var _helper = require("./helper");
@@ -519,7 +526,12 @@ const progressTracker = ()=>{
     );
     state.progress.remaining = state.data.length - completed.length;
     state.progress.completed = completed.length;
-    console.log(state.data.length - completed.length, ' Remaining..');
+};
+const reset = ()=>{
+    state.data.length = 0;
+    state.progress.completed = 0;
+    state.progress.remaining = 0;
+    createInitalState();
 };
 
 },{"./config":"6V52N","./helper":"gDUlg","@parcel/transformer-js/src/esmodule-helpers.js":"ciiiV"}],"6V52N":[function(require,module,exports) {
@@ -529,7 +541,7 @@ parcelHelpers.export(exports, "MAX_NO_PROBLEM", ()=>MAX_NO_PROBLEM
 );
 parcelHelpers.export(exports, "MAX_NUMBER", ()=>MAX_NUMBER
 );
-const MAX_NO_PROBLEM = 6;
+const MAX_NO_PROBLEM = 5;
 const MAX_NUMBER = 25;
 
 },{"@parcel/transformer-js/src/esmodule-helpers.js":"ciiiV"}],"ciiiV":[function(require,module,exports) {
@@ -579,11 +591,15 @@ var _tickPng = require("url:../../img/tick.png");
 var _tickPngDefault = parcelHelpers.interopDefault(_tickPng);
 class Question extends _viewsDefault.default {
     _parentContainer = document.querySelector('.question');
-    _generateQuestions() {
-        return this._data.map((question)=>this._generateQuestionHTML(question)
+    display(state) {
+        this.displayView(state);
+        this.focusInput();
+    }
+    _generateMarkups() {
+        return this._data.map((question)=>this._generateMarkup(question)
         ).join();
     }
-    _generateQuestionHTML(que) {
+    _generateMarkup(que) {
         return `
       <div data-id=${que.id} data-ans=${que.ans} 
        class="que-container ${que.correct ? 'complete' : ''}">
@@ -591,19 +607,26 @@ class Question extends _viewsDefault.default {
         <span class="number">+</span>
         <span class="number">${que.number2}</span>
         <span class="number">=</span>
-        <span class="search ${que.correct ? 'hide' : ''}">
+        <div class="answer ${que.correct ? 'hide' : ''}">
           <input
             type="number"
             min=0
-            class="search__field"
-            placeholder="Type here..."
+            class="answer__field"
+            show=${!que.correct}
+            placeholder="Answer here..."
           />
-        </span>
-        <span ${que.correct ? '' : 'hidden'}>
-            <span class="number">${que.ans}</span>
+        </div>
+        <div class="ans-container" ${que.correct ? '' : 'hidden'}>
+            <span class="ans-number">${que.ans}</span>
             <img src="${_tickPngDefault.default}" alt="Success" class="tick-logo" />
-        </span>
+        </div>
       </div>`;
+    }
+    focusInput() {
+        const inputs = Array.from(this._parentContainer.getElementsByTagName('input')).filter((ele)=>ele.getAttribute('show') === 'true'
+        );
+        if (inputs.length === 0) return;
+        inputs[0].focus();
     }
     addChangeHandler(handler) {
         this._parentContainer.addEventListener('input', function(event) {
@@ -617,14 +640,14 @@ class Question extends _viewsDefault.default {
 }
 exports.default = new Question();
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"ciiiV","./views":"MDRXV","url:../../img/tick.png":"cq0aw"}],"MDRXV":[function(require,module,exports) {
+},{"./views":"MDRXV","url:../../img/tick.png":"cq0aw","@parcel/transformer-js/src/esmodule-helpers.js":"ciiiV"}],"MDRXV":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 class View {
     _data;
-    generateMarkup(data) {
+    displayView(data) {
         this._data = data;
-        const markup = this._generateQuestions(this._data);
+        const markup = this._generateMarkups(this._data);
         this._clear();
         this._parentContainer.insertAdjacentHTML('afterbegin', markup);
     }
@@ -679,22 +702,59 @@ var _views = require("./views");
 var _viewsDefault = parcelHelpers.interopDefault(_views);
 var _doraDiditGif = require("url:../../img/dora-didit.gif");
 var _doraDiditGifDefault = parcelHelpers.interopDefault(_doraDiditGif);
+var _celebGif = require("url:../../img/celeb.gif");
+var _celebGifDefault = parcelHelpers.interopDefault(_celebGif);
+var _thumbsUpGif = require("url:../../img/thumbs-up.gif");
+var _thumbsUpGifDefault = parcelHelpers.interopDefault(_thumbsUpGif);
+var _pepaGif = require("url:../../img/pepa.gif");
+var _pepaGifDefault = parcelHelpers.interopDefault(_pepaGif);
 class Status extends _viewsDefault.default {
     _parentContainer = document.querySelector('.status');
-    _generateQuestions() {
+    _selectImage() {
+        const images = [
+            _doraDiditGifDefault.default,
+            _celebGifDefault.default,
+            _thumbsUpGifDefault.default,
+            _pepaGifDefault.default
+        ];
+        const index = Math.floor(Math.random() * images.length);
+        return images[index];
+    }
+    _generateMarkups() {
         return `
-            <div>
                 <span class="status-item red"> Remaining : ${this._data.remaining}</span>
                 <span class="status-item green"> Completed : ${this._data.completed}</span>
-                ${this._data.remaining ? '' : `<img src=${_doraDiditGifDefault.default} alt="Success" />`}
-            </div>
+                ${this._data.remaining ? '' : `<div class="completed">
+                          <img  src=${this._selectImage()} alt="Success" />
+                          <button class="btn reset">Reset</button>
+                       </div>`}
             `;
+    }
+    addClickHandler(handler) {
+        this._parentContainer.addEventListener('click', (event)=>{
+            const btn = event.target.closest('.reset');
+            if (!btn) return;
+            handler();
+            this._clear();
+        });
+    }
+    _clear() {
+        this._parentContainer.innerHTML = '';
     }
 }
 exports.default = new Status();
 
-},{"./views":"MDRXV","url:../../img/dora-didit.gif":"l1pWR","@parcel/transformer-js/src/esmodule-helpers.js":"ciiiV"}],"l1pWR":[function(require,module,exports) {
+},{"./views":"MDRXV","url:../../img/dora-didit.gif":"l1pWR","url:../../img/celeb.gif":"1BFJ4","url:../../img/thumbs-up.gif":"hXvM9","url:../../img/pepa.gif":"iI4Yz","@parcel/transformer-js/src/esmodule-helpers.js":"ciiiV"}],"l1pWR":[function(require,module,exports) {
 module.exports = require('./helpers/bundle-url').getBundleURL('71ti3') + "dora-didit.bd6c9829.gif" + "?" + Date.now();
+
+},{"./helpers/bundle-url":"chiK4"}],"1BFJ4":[function(require,module,exports) {
+module.exports = require('./helpers/bundle-url').getBundleURL('71ti3') + "celeb.2b3f81ec.gif" + "?" + Date.now();
+
+},{"./helpers/bundle-url":"chiK4"}],"hXvM9":[function(require,module,exports) {
+module.exports = require('./helpers/bundle-url').getBundleURL('71ti3') + "thumbs-up.3ae9eaaa.gif" + "?" + Date.now();
+
+},{"./helpers/bundle-url":"chiK4"}],"iI4Yz":[function(require,module,exports) {
+module.exports = require('./helpers/bundle-url').getBundleURL('71ti3') + "pepa.3d8375b9.gif" + "?" + Date.now();
 
 },{"./helpers/bundle-url":"chiK4"}]},["kS06O","lA0Es"], "lA0Es", "parcelRequire2f70")
 

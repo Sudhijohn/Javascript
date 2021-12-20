@@ -1,8 +1,8 @@
 class View {
   _data;
-  generateMarkup(data) {
+  displayView(data) {
     this._data = data;
-    const markup = this._generateQuestions(this._data);
+    const markup = this._generateMarkups(this._data);
     this._clear();
     this._parentContainer.insertAdjacentHTML('afterbegin', markup);
   }

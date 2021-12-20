@@ -1,12 +1,20 @@
 import View from './views';
 import dora from 'url:../../img/dora-didit.gif';
+import celeb from 'url:../../img/celeb.gif';
+import thumbsup from 'url:../../img/thumbs-up.gif';
+import pepa from 'url:../../img/pepa.gif';
 
 class Status extends View {
   _parentContainer = document.querySelector('.status');
 
-  _generateQuestions() {
+  _selectImage() {
+    const images = [dora, celeb, thumbsup, pepa];
+    const index = Math.floor(Math.random() * images.length);
+    return images[index];
+  }
+
+  _generateMarkups() {
     return `
-            <div>
                 <span class="status-item red"> Remaining : ${
                   this._data.remaining
                 }</span>
@@ -16,10 +24,25 @@ class Status extends View {
                 ${
                   this._data.remaining
                     ? ''
-                    : `<img src=${dora} alt="Success" />`
+                    : `<div class="completed">
+                          <img  src=${this._selectImage()} alt="Success" />
+                          <button class="btn reset">Reset</button>
+                       </div>`
                 }
-            </div>
             `;
+  }
+
+  addClickHandler(handler) {
+    this._parentContainer.addEventListener('click', event => {
+      const btn = event.target.closest('.reset');
+      if (!btn) return;
+      handler();
+      this._clear();
+    });
+  }
+
+  _clear() {
+    this._parentContainer.innerHTML = '';
   }
 }
 
