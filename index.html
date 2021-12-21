@@ -17,13 +17,16 @@
   </head>
 
   <body>
+    <div class='loader'>
+      <img src='./src/img/loader.gif' alt='Loding....' />
+    </div>
     <div class="container">
       <header class="header">
         <img src="src/img/logo.png" alt="Logo" class="header-logo" />
-        <h1><span class="one">The</span><span class="two"> Sum</span><span class="three"> Game</Span></h1>
+        <h1><span class="one">The</span><span class="two"> Math</span><span class="three"> Game</Span></h1>
         <nav class="nav">
           <ul class="nav-list">
-            <li class="nav-item active">
+            <!-- <li class="nav-item active">
               <button class="nav-btn nav-btn">
                 <svg>
                   <use href="src/img/icons.svg#icon-user"></use>
@@ -38,7 +41,7 @@
                 </svg>
                 <span>Jaiden</span>
               </button>
-            </li>
+            </li> -->
           </ul>
         </nav>
       </header>
@@ -51,13 +54,18 @@
               <use href="src/img/icons.svg#icon-smile"></use>
             </svg>
           </div>
-          <p>Add the numbers! Have fun!</p>
+          <p> Have fun!</p>
         </div>
         <div class="status"></div>
       </div>
       <div class="question"></div>
-      </div>
     </div>
     </div>
+    <script>
+      window.addEventListener('load',function(){
+        const loader = document.querySelector('.loader');
+        loader.classList.add('hidden');
+      })
+    </script>
   </body>
 </html>
