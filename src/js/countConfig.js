@@ -23,6 +23,6 @@ const imageCountConfig = [
 
 export const getImagePath = () => {
   const length = imageCountConfig.length;
-  index = generateNumber(length);
+  const index = generateNumber(length);
   return imageCountConfig[index].img;
 };
